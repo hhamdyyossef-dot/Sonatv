@@ -1,0 +1,31 @@
+name: Build SONA TV APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: curl,mbstring,openssl,pdo,pdo_sqlite
+          tools: composer:v2
+      - name: Prepare env
+        run: cp .env.example .env
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+      - name: Generate key
+        run: php artisan key:generate --force
+      - name: Install NativePHP Android
+        run: php artisan native:install android --force --no-tty --without-icu
+      - name: Build APK
+        run: php artisan native:run android --build=debug --no-tty
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SONA-TV-APK
+          path: '**/*.apk'
+          if-no-files-found: error
