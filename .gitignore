@@ -1,0 +1,6 @@
+/vendor/
+.env
+/nativephp/
+/node_modules/
+/public/build/
+/storage/*.key
